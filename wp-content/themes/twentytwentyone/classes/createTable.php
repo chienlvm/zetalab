@@ -12,7 +12,7 @@ function my_custom_plugin_activate()
     
     $table_TB_LOGIN = $wpdb->prefix . 'TB_LOGIN';
     $sql_TB_LOGIN = "CREATE TABLE IF NOT EXISTS $table_TB_LOGIN (
-      member_no INT NOT NULL,
+      member_no INT AUTO_INCREMENT NOT NULL,
       email VARCHAR(255) NOT NULL,
       password VARCHAR(255) NOT NULL,
       ip VARCHAR(255) NOT NULL,
@@ -36,8 +36,7 @@ function my_custom_plugin_activate()
   $sql_TB_MEMBER = "CREATE TABLE IF NOT EXISTS $table_TB_MEMBER (
     member_no INT NOT NULL,
     email VARCHAR(255) NOT NULL,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
     date_of_birth datetime NULL,
     address VARCHAR(255) NULL,
     phone_number VARCHAR(255) NULL,
@@ -46,14 +45,12 @@ function my_custom_plugin_activate()
     update_dt DATETIME ON UPDATE CURRENT_TIMESTAMP,
     create_by VARCHAR(255) NULL,
     update_by VARCHAR(255) NULL,
-    PRIMARY KEY (member_no),
     FOREIGN KEY (member_no) REFERENCES $table_TB_LOGIN (member_no)
-
   )$charset_collate;";
 
   $table_TB_USER_SESSION = $wpdb->prefix . 'TB_USER_SESSION';
   $sql_TB_USER_SESSION = "CREATE TABLE IF NOT EXISTS $table_TB_USER_SESSION (
-    session_id VARCHAR(255) NOT NULL,
+    session_id INT AUTO_INCREMENT NOT NULL,
     member_no INT NOT NULL,
     session_name VARCHAR(255) NOT NULL,
     browser_login VARCHAR(255) NULL,
@@ -69,7 +66,7 @@ function my_custom_plugin_activate()
 
   $table_TB_MAIL_EXT = $wpdb->prefix . 'TB_MAIL_EXT';
   $sql_TB_MAIL_EXT = "CREATE TABLE IF NOT EXISTS $table_TB_MAIL_EXT (
-    mail_id VARCHAR(255) NOT NULL,
+    mail_id INT AUTO_INCREMENT NOT NULL,
     member_no INT NOT NULL,
     mail_cd VARCHAR(255) NOT NULL,
     mail_direct VARCHAR(255) NULL,
@@ -88,7 +85,7 @@ function my_custom_plugin_activate()
 
   $table_TB_SUBSCRIPTION = $wpdb->prefix . 'TB_SUBSCRIPTION';
   $sql_TB_SUBSCRIPTION = "CREATE TABLE IF NOT EXISTS $table_TB_SUBSCRIPTION (
-    sub_id VARCHAR(255) NOT NULL,
+    sub_id INT AUTO_INCREMENT NOT NULL,
     sub_key VARCHAR(255) NOT NULL,
     member_no INT NOT NULL,
     sub_create VARCHAR(255) NULL,
@@ -106,25 +103,25 @@ function my_custom_plugin_activate()
     FOREIGN KEY (member_no) REFERENCES $table_TB_LOGIN (member_no)
   )$charset_collate;";
 
-  $table_TB_SUBSCRIPTION_HIS = $wpdb->prefix . 'TB_SUBSCRIPTION_HIS';
-  $sql_TB_SUBSCRIPTION_HIS = "CREATE TABLE IF NOT EXISTS $table_TB_SUBSCRIPTION_HIS (
-    sub_id VARCHAR(255) NOT NULL,
-    sub_key VARCHAR(255) NOT NULL,
-    member_no INT NOT NULL,
-    sub_create VARCHAR(255) NULL,
-    sub_plan VARCHAR(255) NULL,
-    sub_remind VARCHAR(255) NULL,
-    sub_mail_remind int(10) DEFAULT 0,
-    sub_pay int(10) DEFAULT 0,
-    sub_expired datetime NOT NULL,
-    sub_limit_active int(10) DEFAULT 0,
-    del_f int(10) DEFAULT 0,
-    create_dt datetime DEFAULT CURRENT_TIMESTAMP,
-    create_by VARCHAR(255) NULL,
-    update_by VARCHAR(255) NULL,
-    PRIMARY KEY (sub_id),
-    FOREIGN KEY (member_no) REFERENCES $table_TB_LOGIN (member_no)
-  )$charset_collate;";
+  // $table_TB_SUBSCRIPTION_HIS = $wpdb->prefix . 'TB_SUBSCRIPTION_HIS';
+  // $sql_TB_SUBSCRIPTION_HIS = "CREATE TABLE IF NOT EXISTS $table_TB_SUBSCRIPTION_HIS (
+  //   sub_id VARCHAR(255) NOT NULL,
+  //   sub_key VARCHAR(255) NOT NULL,
+  //   member_no INT NOT NULL,
+  //   sub_create VARCHAR(255) NULL,
+  //   sub_plan VARCHAR(255) NULL,
+  //   sub_remind VARCHAR(255) NULL,
+  //   sub_mail_remind int(10) DEFAULT 0,
+  //   sub_pay int(10) DEFAULT 0,
+  //   sub_expired datetime NOT NULL,
+  //   sub_limit_active int(10) DEFAULT 0,
+  //   del_f int(10) DEFAULT 0,
+  //   create_dt datetime DEFAULT CURRENT_TIMESTAMP,
+  //   create_by VARCHAR(255) NULL,
+  //   update_by VARCHAR(255) NULL,
+  //   PRIMARY KEY (sub_id),
+  //   FOREIGN KEY (member_no) REFERENCES $table_TB_LOGIN (member_no)
+  // )$charset_collate;";
 
   $table_TB_SUBSCRIPTION_MASTER = $wpdb->prefix . 'TB_SUBSCRIPTION_MASTER';
   $sql_TB_SUBSCRIPTION_MASTER = "CREATE TABLE IF NOT EXISTS $table_TB_SUBSCRIPTION_MASTER (
@@ -144,7 +141,6 @@ function my_custom_plugin_activate()
     dbDelta($sql_TB_MAIL_EXT);
     dbDelta($sql_TB_MEMBER);
     dbDelta($sql_TB_SUBSCRIPTION);
-    dbDelta($sql_TB_SUBSCRIPTION_HIS);
     dbDelta($sql_TB_SUBSCRIPTION_MASTER);
     dbDelta($sql_TB_USER_SESSION);
 }

@@ -19,7 +19,6 @@ if (!function_exists('create_securityID')) {
 		$session->setSecurityId();
 	}
 }
-
 add_action('admin_post_custom_login', 'custom_login');
 add_action('admin_post_nopriv_custom_login', 'custom_login');
 
@@ -306,6 +305,11 @@ function custom_page_router()
 		include(get_template_directory() . '/page-login.php');
 		exit;
 	}
+	if (is_page('confirmation_token')) {
+		include(get_template_directory() . '/confirmation_token.php');
+		exit;
+	}
+
 	if (is_page('confirmation_token')) {
 		include(get_template_directory() . '/confirmation_token.php');
 		exit;

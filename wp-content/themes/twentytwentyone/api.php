@@ -5,6 +5,8 @@ use Detection\MobileDetect;
 define('API_NAMESPACE', 'api/v1');
 define('API_ENDPOINT', 'register');
 define('API_ENDPOINT_VERIFY', 'confirmToken');
+define('API_ENDPOINT_SUBSCRIPTION', 'subscription');
+
 require get_template_directory() . '/lib/MobileDetect.php';
 // import email
 require_once get_template_directory() . '/email/sendMail.php';
@@ -20,6 +22,11 @@ add_action('rest_api_init', function () {
     'methods' => 'POST',
     'content_type' => 'application/json',
     'callback' => 'register',
+  ));
+  register_rest_route(API_NAMESPACE, '/' . API_ENDPOINT_SUBSCRIPTION, array(
+    'methods' => 'POST',
+    'content_type' => 'application/json',
+    'callback' => 'subscription',
   ));
 });
 function is_email_exists($email)
@@ -190,7 +197,7 @@ if (!function_exists('confirmToken')) {
       $dateTimeObj = DateTime::createFromFormat('Y-m-d H:i:s', $results['create_dt']);
       // Lấy ngày dạng chuỗi
       $date = $dateTimeObj->format('Y-m-d');
-      $diff = strtotime(date('Y-m-d'))-strtotime($date);
+      $diff = strtotime(date('Y-m-d')) - strtotime($date);
       $diffInDays = round($diff / (60 * 60 * 24));
       if ($diffInDays > 30) {
         $dataError = array(
@@ -212,7 +219,7 @@ if (!function_exists('confirmToken')) {
       );
 
       $table_name = $wpdb->prefix . 'tb_login';
-      $updated = $wpdb->update($table_name, $data_update, $data_where_confirm_token, array('%d', '%d', '%s'), array('%s','%s'));
+      $updated = $wpdb->update($table_name, $data_update, $data_where_confirm_token, array('%d', '%d', '%s'), array('%s', '%s'));
       if ($updated !== 0) {
         $_SESSION['member_no'] = $results['member_no'];
         $_SESSION['email'] = $results['email'];
@@ -230,9 +237,9 @@ if (!function_exists('confirmToken')) {
       $response = rest_ensure_response($dataError);
       return $response;
     }
-		$dataSuccess = array(
-			'message' => 'Success'
-		);
+    $dataSuccess = array(
+      'message' => 'Success'
+    );
     return rest_ensure_response($dataSuccess);
   }
 }
@@ -259,18 +266,75 @@ function getUserByToken($token)
   return $data;
 }
 
-$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : 'login';
+function getPlanSub($subKey)
+{
+  if ($subKey === '01') {
+    return '01';
+  } else if ($subKey === '02') {
+    return '02';
+  } else if ($subKey === '03') {
+    return '03';
+  } else {
+    return '';
+  }
+}
+function getSubExpired($subKey)
+{
+  $dt = date("Y-m-d");
+  if ($subKey === '01') {
+    return date("Y-m-d", strtotime("$dt +1 month"));
+  } else if ($subKey === '02') {
+    return date("Y-m-d", strtotime("$dt +1 month"));
+  } else if ($subKey === '03') {
+    return date("Y-m-d", strtotime("$dt +12 month"));;
+  } else {
+    return '';
+  }
+}
 
-// function logout
-$default_actions = array(
-	'logout',
-);
+if (!function_exists('subscription')) {
+  function subscription(WP_REST_Request $request)
+  {
+    $params = $request->get_params();
+    $subKey = $params['sub_key'];
+    // $memberNo = $_SESSION['member_no'];
+    $_SESSION['email'] = 'test';
+    $memberNo = '33';
+    if (empty($subKey) || $subKey !== '01' || $subKey !== '02' || $subKey !== '03') {
+      $dataError = array(
+        'error' => 'System error'
+      );
+      $response = rest_ensure_response($dataError);
+      return $response;
+    }
 
+    global $wpdb;
+    $table_TB_SUBSCRIPTION = $wpdb->prefix . 'TB_SUBSCRIPTION';
 
-do_action( 'test' );
-/**
- * method custome logout
- */
-function custome_log_out() {
+    // register login
+    $data_insert = array(
+      'sub_key' => $subKey,
+      'member_no' => $memberNo,
+      'sub_create' => current_time('Y-m-d'),
+      'sub_plan' => getPlanSub($subKey),
+      'del_f' => 0,
+      'sub_expired' => getSubExpired($subKey),
+      'create_by' => $_SESSION['email'],
+    );
 
+    $register_TB_SUBSCRIPTION = $wpdb->insert($table_TB_SUBSCRIPTION, $data_insert);
+    if ($register_TB_SUBSCRIPTION !== false) {
+      $dataOK = array(
+        'message' => 'OK'
+      );
+      $response = rest_ensure_response($dataOK);
+      return $response;
+    } else {
+      $dataError = array(
+        'error' => 'System error'
+      );
+      $response = rest_ensure_response($dataError);
+      return $response;
+    }
+  }
 }
